@@ -176,6 +176,7 @@ class Converter:
         elif msg_type == "error":
             err_msg = payload.get("message", "Unknown error")
             if self.current_assistant_msg:
+                now = int(time.time() * 1000)
                 error_part = {
                     "type": "tool",
                     "id": _new_id("prt"),
@@ -183,7 +184,12 @@ class Converter:
                     "messageID": self.current_assistant_msg.info["id"],
                     "callID": f"error_{_new_id('call')[5:]}",
                     "tool": "unknown",
-                    "state": {"status": "error", "error": err_msg},
+                    "state": {
+                        "status": "error",
+                        "input": {},
+                        "error": err_msg,
+                        "time": {"start": now, "end": now},
+                    },
                 }
                 self.current_assistant_msg.parts.append(error_part)
 
