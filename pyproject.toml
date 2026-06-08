@@ -1,0 +1,19 @@
+[project]
+name = "apotheosession"
+version = "0.1.0"
+description = "Convert Codex CLI session files to OpenCode import format"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["apotheosession*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
