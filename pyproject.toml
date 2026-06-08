@@ -8,9 +8,20 @@ dependencies = []
 
 [dependency-groups]
 dev = [
+    "hatchling>=1.30.1",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
 ]
+
+[build-system]
+requires = ["hatchling>=1.0"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+apotheosession = "apotheosession.main:main"
+
+[tool.uv]
+package = true
 
 [tool.setuptools.packages.find]
 include = ["apotheosession*"]
