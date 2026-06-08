@@ -196,13 +196,26 @@ class Converter:
                 if text and is_user_message_text(text):
                     if not self._first_user_text:
                         self._first_user_text = text[:60]
-                    self.current_user_msg = make_user_message(text, self.session_id)
+                    cwd = self.session_meta.get("cwd", "") if self.session_meta else ""
+                    self.current_user_msg = make_user_message(
+                        text, self.session_id,
+                        agent="codex",
+                        model_provider=self._model_provider,
+                        model_id=self._model_id,
+                    )
                     self.messages.append(self.current_user_msg)
                     self.state = "USER_MSG"
 
             elif role == "assistant":
                 parent_id = self.current_user_msg.info["id"] if self.current_user_msg else ""
-                self.current_assistant_msg = make_assistant_message(parent_id, self.session_id)
+                cwd = self.session_meta.get("cwd", "") if self.session_meta else ""
+                self.current_assistant_msg = make_assistant_message(
+                    parent_id, self.session_id,
+                    agent="codex",
+                    model_id=self._model_id,
+                    provider_id=self._model_provider,
+                    cwd=cwd,
+                )
                 if self._has_reasoning:
                     part = make_reasoning_part(
                         self.current_assistant_msg.info["id"], self.session_id

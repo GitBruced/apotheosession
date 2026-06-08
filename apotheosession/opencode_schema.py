@@ -100,21 +100,42 @@ def make_file_part(filename: str, session_id: str, message_id: str) -> dict:
     }
 
 
-def make_user_message(text: str, session_id: str) -> OpenCodeMessage:
+def make_user_message(
+    text: str,
+    session_id: str,
+    agent: str = "codex",
+    model_provider: str = "",
+    model_id: str = "",
+) -> OpenCodeMessage:
     msg_id = new_message_id()
+    info: dict = {
+        "id": msg_id,
+        "sessionID": session_id,
+        "role": "user",
+        "time": {"created": int(time.time() * 1000)},
+        "agent": agent,
+    }
+    if model_provider and model_id:
+        info["model"] = {"providerID": model_provider, "modelID": model_id}
+    else:
+        info["model"] = {"providerID": "unknown", "modelID": "unknown"}
     return OpenCodeMessage(
-        info={
-            "id": msg_id,
-            "sessionID": session_id,
-            "role": "user",
-            "time": {"created": int(time.time() * 1000)},
-        },
+        info=info,
         parts=[make_text_part(text, msg_id, session_id)],
     )
 
 
-def make_assistant_message(parent_id: str, session_id: str) -> OpenCodeMessage:
+def make_assistant_message(
+    parent_id: str,
+    session_id: str,
+    agent: str = "codex",
+    model_id: str = "",
+    provider_id: str = "",
+    cwd: str = "",
+) -> OpenCodeMessage:
     msg_id = new_message_id()
+    import os
+    root = os.path.splitdrive(cwd)[0] + "\\" if cwd and os.path.splitdrive(cwd)[0] else "/"
     return OpenCodeMessage(
         info={
             "id": msg_id,
@@ -122,6 +143,19 @@ def make_assistant_message(parent_id: str, session_id: str) -> OpenCodeMessage:
             "role": "assistant",
             "parentID": parent_id,
             "time": {"created": int(time.time() * 1000)},
+            "agent": agent,
+            "mode": "build",
+            "modelID": model_id or "unknown",
+            "providerID": provider_id or "unknown",
+            "path": {"cwd": cwd or "", "root": root},
+            "cost": 0,
+            "tokens": {
+                "total": 0,
+                "input": 0,
+                "output": 0,
+                "reasoning": 0,
+                "cache": {"read": 0, "write": 0},
+            },
         },
         parts=[],
     )

@@ -22,9 +22,18 @@ def test_convert_minimal_session():
     msgs = d["messages"]
     assert msgs[0]["info"]["role"] == "user"
     assert msgs[0]["parts"][0]["text"] == "What is the capital of France?"
+    assert msgs[0]["info"]["agent"] == "codex"
+    assert "model" in msgs[0]["info"]
 
     assert msgs[1]["info"]["role"] == "assistant"
     assert msgs[1]["info"]["parentID"] == msgs[0]["info"]["id"]
+    assert msgs[1]["info"]["agent"] == "codex"
+    assert msgs[1]["info"]["mode"] == "build"
+    assert msgs[1]["info"]["modelID"] == "gpt-5.5"
+    assert msgs[1]["info"]["providerID"] == "openai"
+    assert "path" in msgs[1]["info"]
+    assert "tokens" in msgs[1]["info"]
+    assert "cost" in msgs[1]["info"]
 
     parts = msgs[1]["parts"]
     texts = [p["text"] for p in parts if p.get("type") == "text"]
