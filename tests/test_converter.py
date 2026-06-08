@@ -16,7 +16,9 @@ def test_convert_minimal_session():
     info = d["info"]
     assert info["title"] != ""
     assert info["directory"] == "C:\\Users\\PC\\project"
-    assert info["projectID"] != "global"
+    assert info["projectID"] == "global"
+    assert info["id"].startswith("ses_codex_")
+    assert info["slug"].startswith("codex-")
     assert info["model"]["providerID"] == "openai"
     assert info["model"]["id"] == "gpt-5.5"
 

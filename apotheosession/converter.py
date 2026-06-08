@@ -305,19 +305,6 @@ class Converter:
         if self.current_assistant_msg or self.current_user_msg:
             self._finalize_turn()
 
-    def _get_project_id(self) -> str:
-        try:
-            import subprocess
-            result = subprocess.run(
-                ["git", "rev-parse", "HEAD"],
-                capture_output=True, text=True, timeout=5,
-            )
-            if result.returncode == 0:
-                return result.stdout.strip()
-        except Exception:
-            pass
-        return self.session_id
-
     def _build_session(self) -> OpenCodeSession:
         created = ""
         updated = self._last_timestamp
@@ -325,7 +312,7 @@ class Converter:
             created = self.session_meta.get("timestamp", "")
 
         directory = self.session_meta.get("cwd", "") if self.session_meta else ""
-        project_id = self._get_project_id()
+        codex_uuid = self.session_meta.get("id", "") if self.session_meta else ""
 
         title = self._first_user_text if self._first_user_text else "Codex Session"
         title = f"{title} | {created[:10]}" if created else title
@@ -338,7 +325,9 @@ class Converter:
             model_provider=self._model_provider,
             model_id=self._model_id,
         )
-        info.id = self.session_id
-        info.projectID = project_id
+        # Derive stable session ID from Codex UUID
+        codex_short = codex_uuid.replace("-", "")[:12] if codex_uuid else ""
+        info.id = f"ses_codex_{codex_short}" if codex_short else self.session_id
+        info.slug = f"codex-{codex_short}" if codex_short else info.slug
 
         return OpenCodeSession(info=info, messages=self.messages)
