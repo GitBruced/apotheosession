@@ -305,15 +305,27 @@ class Converter:
         if self.current_assistant_msg or self.current_user_msg:
             self._finalize_turn()
 
+    def _get_project_id(self) -> str:
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                capture_output=True, text=True, timeout=5,
+            )
+            if result.returncode == 0:
+                return result.stdout.strip()
+        except Exception:
+            pass
+        return self.session_id
+
     def _build_session(self) -> OpenCodeSession:
         created = ""
         updated = self._last_timestamp
-        directory = ""
         if self.session_meta:
             created = self.session_meta.get("timestamp", "")
 
-        if self.session_meta and self.session_meta.get("cwd"):
-            directory = self.session_meta["cwd"]
+        directory = os.getcwd()
+        project_id = self._get_project_id()
 
         title = self._first_user_text if self._first_user_text else "Codex Session"
         title = f"{title} | {created[:10]}" if created else title
@@ -327,5 +339,6 @@ class Converter:
             model_id=self._model_id,
         )
         info.id = self.session_id
+        info.projectID = project_id
 
         return OpenCodeSession(info=info, messages=self.messages)
